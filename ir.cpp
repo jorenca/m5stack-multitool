@@ -2,6 +2,8 @@
 #include "functionality.h"
 
 class IR : public Functionality {
+  private:
+   
   public:
     IR() {}
 

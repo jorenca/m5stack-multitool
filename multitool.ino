@@ -2,6 +2,7 @@
 #include "functionality.h"
 #include "ir.cpp"
 #include "wifi_hotspot.cpp"
+#include "tone.cpp"
 
 #define TEXT_HEIGHT 16
 
@@ -17,7 +18,7 @@ void setup() {
   showMenu(selected);
 }
 
-Functionality* functions[] = { new WiFiHotspot(), new IR() };
+Functionality* functions[] = { new WiFiHotspot(), new IR(), new Tone() };
 const char* MENU_ITEMS[] = {"WiFi Hotspot", "IR I/O", "Tone"};
 const int MENU_ITEMS_COUNT = 3;
 
