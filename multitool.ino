@@ -3,6 +3,7 @@
 #include "ir.cpp"
 #include "wifi_hotspot.cpp"
 #include "tone.cpp"
+#include "plot_analog_in.cpp"
 
 #define TEXT_HEIGHT 16
 
@@ -18,9 +19,9 @@ void setup() {
   showMenu(selected);
 }
 
-Functionality* functions[] = { new WiFiHotspot(), new IR(), new Tone() };
-const char* MENU_ITEMS[] = {"WiFi Hotspot", "IR I/O", "Tone"};
-const int MENU_ITEMS_COUNT = 3;
+Functionality* functions[] = { new PlotAnalogIn(), new WiFiHotspot(), new IR(), new Tone() };
+const char* MENU_ITEMS[] = {"Plot Analog In", "WiFi Hotspot", "IR I/O", "Tone"};
+const int MENU_ITEMS_COUNT = 4;
 
 void loop() {
   M5.update();
