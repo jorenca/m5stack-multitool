@@ -1,6 +1,6 @@
 #include <M5Stack.h>
 #include "functionality.h"
-#include "ir.cpp"
+#include "ir_rc5_reader.cpp"
 #include "wifi_hotspot.cpp"
 #include "tone.cpp"
 #include "plot_analog_in.cpp"
@@ -19,8 +19,8 @@ void setup() {
   showMenu(selected);
 }
 
-Functionality* functions[] = { new PlotAnalogIn(), new WiFiHotspot(), new IR(), new Tone() };
-const char* MENU_ITEMS[] = {"Plot Analog In", "WiFi Hotspot", "IR I/O", "Tone"};
+Functionality* functions[] = { new PlotAnalogIn(), new WiFiHotspot(), new IRrc5Read(), new Tone() };
+const char* MENU_ITEMS[] = {"Plot Analog In", "WiFi Hotspot", "IR RC-5 Read", "Tone"};
 const int MENU_ITEMS_COUNT = 4;
 
 void loop() {

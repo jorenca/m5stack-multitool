@@ -1,25 +1,57 @@
 #include <M5Stack.h>
 #include "functionality.h"
 
-class IR : public Functionality {
+class IRrc5Read : public Functionality {
   private:
     static const int INPUT_PIN = 2; // normal high
 
-    void printSuccessfulRead(int code) {
-      
-      int res = code & 0b11111111111000; // erase starting bits and toggle bit
+    static const int CODE_DISPLAY_TOP_PX = 50;
+    static const int CODE_DISPLAY_HEIGHT_PX = 100;
 
+    static const int ERROR_DISPLAY_TOP_PX = CODE_DISPLAY_TOP_PX + CODE_DISPLAY_HEIGHT_PX;
+    static const int ERROR_DISPLAY_HEIGHT_PX = 70;
+
+    void printSuccessfulRead(int code) {
+      M5.Lcd.fillRect(0, CODE_DISPLAY_TOP_PX, 320, CODE_DISPLAY_HEIGHT_PX, TFT_BLACK);
+      M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+      M5.Lcd.setTextSize(3);
+      M5.Lcd.setCursor(0, CODE_DISPLAY_TOP_PX);
       
-      M5.Lcd.setCursor(0, 50);
-      M5.Lcd.printf("SUCCESS! %d\n", res);
+      for(int i=0; i<14; i++) {
+        if (i==3) M5.Lcd.setTextColor(TFT_BLACK, TFT_YELLOW);
+        if (i==8) M5.Lcd.setTextColor(TFT_GREEN, TFT_RED);
+        M5.Lcd.printf("%d", (code & (1<<i)) != 0);
+      }
+
+      int address = 0;
+      for(int bitPos=3; bitPos<8; bitPos++) { // code bit 4 is the most significant bit in the address, bit 8 is LSB
+        address<<=1;
+        address |= ((code & (1<<bitPos)) != 0);
+      }
+      M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+      M5.Lcd.print("\nAddress:");
+      M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
+      M5.Lcd.printf("%d\n", address);
+
+      int command = 0;
+      for(int bitPos=8; bitPos<14; bitPos++) { // code bit 9 is the most significant bit in the command, bit 14 is LSB
+        command<<=1;
+        command |= ((code & (1<<bitPos)) != 0);
+      }
+      M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+      M5.Lcd.printf("Command:");
+      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+      M5.Lcd.printf("%d", command);
     }
 
     void printError(const char* msg) {
-      M5.Lcd.setCursor(0, 150);
-      M5.Lcd.printf("%s\nbitpieces %d\n", msg, bitpI);
+      M5.Lcd.fillRect(0, ERROR_DISPLAY_TOP_PX, 320, ERROR_DISPLAY_HEIGHT_PX, TFT_BLACK);
+      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.setCursor(0, ERROR_DISPLAY_TOP_PX);
+      M5.Lcd.printf("%s\n", msg, bitpI);
       
       for(int i=0; i<bitpI; i++) M5.Lcd.printf("%d ", bitPieces[i]);
-      M5.Lcd.print("\n");
     }
     
     bool bitPieces[100];
@@ -72,14 +104,14 @@ class IR : public Functionality {
     }
    
   public:
-    IR() {
+    IRrc5Read() {
       pinMode(INPUT_PIN, INPUT);
     }
 
     void setup() {
       M5.Lcd.fillScreen(BLACK);
       M5.Lcd.setTextColor(TFT_WHITE, TFT_BLUE);
-      M5.Lcd.drawCentreString("== RC-5 IR I/O ==", 320/2, 0, 2);
+      M5.Lcd.drawCentreString("== IR RC-5 Reader (pin 2 input active low) ==", 320/2, 0, 2);
     }
 
     void loop() {
