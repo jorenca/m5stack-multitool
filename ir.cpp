@@ -5,13 +5,27 @@ class IR : public Functionality {
   private:
     static const int INPUT_PIN = 2; // normal high
 
-    int cc = 0;
+    void printSuccessfulRead(int code) {
+      
+      int res = code & 0b11111111111000; // erase starting bits and toggle bit
+
+      
+      M5.Lcd.setCursor(0, 50);
+      M5.Lcd.printf("SUCCESS! %d\n", res);
+    }
+
+    void printError(const char* msg) {
+      M5.Lcd.setCursor(0, 150);
+      M5.Lcd.printf("%s\nbitpieces %d\n", msg, bitpI);
+      
+      for(int i=0; i<bitpI; i++) M5.Lcd.printf("%d ", bitPieces[i]);
+      M5.Lcd.print("\n");
+    }
     
     bool bitPieces[100];
     int bitpI = 0;
 
     void readNext() {
-      
       bitpI = 0;
       while(digitalRead(INPUT_PIN)); // wait for fall
       bitPieces[bitpI++] = 0; // always starts with 0
@@ -36,28 +50,25 @@ class IR : public Functionality {
       }
 
       if (bitpI != 28 && bitpI != 29) {
-        M5.Lcd.printf("Failed reading, bitpI %d\n", bitpI);
-        
-        for(int i=0; i<bitpI; i++) M5.Lcd.printf("%d ", bitPieces[i]);
+        printError("Incorrect number of bitpieces");
         return;
       }
         
       int res = 0;
       for(int i=0; i<bitpI; i+=2) {
         if (bitPieces[i] == bitPieces[i+1]) {
-          M5.Lcd.print("Failed decoding bitpieces, same pair.\n");
+          printError("Failed decoding bitpieces, same pair.");
           return;
          }
          res |= (bitPieces[i+1])<<(i/2);
       }
 
       if (res & 0b11 != 0b11) {
-        M5.Lcd.printf("Failed checking first 2 bits. %d\n", res);
-        for(int i=0; i<bitpI; i++) M5.Lcd.printf("%d ", bitPieces[i]);
+        printError("Failed checking first 2 bits");
         return;
       }
-      res &= 0b11111111111000; // erase starting bits and toggle bit
-      M5.Lcd.printf("SUCCESS! %d\n", res);
+
+      printSuccessfulRead(res);
     }
    
   public:
@@ -68,15 +79,10 @@ class IR : public Functionality {
     void setup() {
       M5.Lcd.fillScreen(BLACK);
       M5.Lcd.setTextColor(TFT_WHITE, TFT_BLUE);
-      M5.Lcd.drawCentreString("== IR I/O ==", 320/2, 0, 2);
+      M5.Lcd.drawCentreString("== RC-5 IR I/O ==", 320/2, 0, 2);
     }
 
     void loop() {
-      if (cc%20 == 0) {
-        M5.Lcd.fillScreen(BLACK);
-        M5.Lcd.setCursor(0, 0);
-      }
       readNext();
-      cc++;
     }
 };
